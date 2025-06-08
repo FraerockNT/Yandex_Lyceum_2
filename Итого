@@ -1,0 +1,29 @@
+def calculate_total_cost(filename):
+    total_cost = 0.0
+
+    try:
+        with open(filename, 'r') as file:
+            for line in file:
+                line = line.strip()
+                if line:
+                    parts = line.split('\t')
+                    if len(parts) == 3:
+                        try:
+                            product_name = parts[0]
+                            quantity = int(parts[1])
+                            price_per_unit = float(parts[2])
+
+                            total_cost += quantity * price_per_unit
+                        except ValueError:
+                            print(f"Ошибка в данных товара: {line}")
+                            continue
+
+        print(f"{total_cost:.2f}")
+
+    except FileNotFoundError:
+        print("Файл не найден.")
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
+
+        
+calculate_total_cost('prices.txt')
