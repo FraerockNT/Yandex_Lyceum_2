@@ -1,0 +1,75 @@
+import sys
+from PyQt6.QtWidgets import QWidget, QApplication, QPushButton, QLineEdit, QLabel, QLCDNumber
+
+
+class MiniCalculator(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setGeometry(320, 320, 380, 380)
+        self.setWindowTitle('Вычисление выражений')
+
+        self.lable = QLabel(self)
+        self.lable.setText('Первое число(целое):')
+        self.lable.move(10, 70)
+
+        self.lable = QLabel(self)
+        self.lable.setText('Второе число(целое):')
+        self.lable.move(10, 130)
+
+        self.number_1 = QLineEdit(self)
+        self.number_1.move(10, 90)
+
+        self.number_2 = QLineEdit(self)
+        self.number_2.move(10, 150)
+
+        self.calculate_button = QPushButton('->', self)
+        self.calculate_button.move(130, 115)
+        self.calculate_button.clicked.connect(self.run)
+
+        self.lable = QLabel(self)
+        self.lable.setText('Сумма:')
+        self.lable.move(220, 80)
+
+        self.lable = QLabel(self)
+        self.lable.setText('Разность:')
+        self.lable.move(220, 105)
+
+        self.lable = QLabel(self)
+        self.lable.setText('Произведение:')
+        self.lable.move(220, 130)
+
+        self.lable = QLabel(self)
+        self.lable.setText('Частное:')
+        self.lable.move(220, 155)
+
+        self.result_sum = QLCDNumber(self)
+        self.result_sum.move(300, 80)
+
+        self.result_sub = QLCDNumber(self)
+        self.result_sub.move(300, 105)
+
+        self.result_mul = QLCDNumber(self)
+        self.result_mul.move(300, 130)
+
+        self.result_div = QLCDNumber(self)
+        self.result_div.move(300, 155)
+
+    def run(self):
+        x, y = list(map(int, [self.number_1.text(), self.number_2.text()]))
+        self.result_sum.display(x + y)
+        self.result_sub.display(x - y)
+        self.result_mul.display(x * y)
+        if y != 0:
+            self.result_div.display(f'{x / y:.3f}')
+        else:
+            self.result_div.display('Error')
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    wnd = MiniCalculator()
+    wnd.show()
+    sys.exit(app.exec())
