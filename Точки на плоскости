@@ -1,0 +1,12 @@
+on_axis = []
+name_quarter = ["I", "IV", "II", "III"]
+quarter = [0, 0, 0, 0]
+for i in range(int(input())):
+    x, y = map(int, input().split())
+    if 0 in (x, y):
+        on_axis.append((x, y))
+    else:
+        quarter[2 * (x < 0) + (y < 0)] += 1
+if len(on_axis) != 0:
+    print(*on_axis, sep="\n")
+print(*sorted([f"{k}: {v}" for k, v in zip(name_quarter, quarter)]), sep=", ", end='.')
