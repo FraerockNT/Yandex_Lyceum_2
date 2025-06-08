@@ -1,0 +1,44 @@
+def check_tel(s):
+    s = s.strip()
+    s = ''.join(s.split())
+
+    if s.startswith('+7'):
+        s = s[2:]
+    elif s.startswith('8'):
+        s = s[1:]
+    else:
+        raise ValueError("неверный формат")
+
+    if s.endswith('-') or '--' in s:
+        raise ValueError("неверный формат")
+
+    s = ''.join(s.split('-'))
+    ss = ''.join(x for x in s if x in '()')
+    if ss not in ['', '()']:
+        raise ValueError("неверный формат")
+
+    s = s.replace('(', '')
+    s = s.replace(')', '')
+
+    if not s.isdigit():
+        raise ValueError("неверный формат")
+    elif len(s) != 10:
+        raise ValueError("неверное количество цифр")
+
+    operator_code = s[:3]
+    if 910 <= int(operator_code) <= 919 or 980 <= int(operator_code) <= 989:
+        operator = "МТС"
+    elif 920 <= int(operator_code) <= 939:
+        operator = "МегаФон"
+    elif 902 <= int(operator_code) <= 906 or 960 <= int(operator_code) <= 969:
+        operator = "Билайн"
+    else:
+        return "не определяется оператор сотовой связи"
+
+    return f'+7{s[0:3]}{s[3:6]}{s[6:]}'
+
+
+try:
+    print(check_tel(input()))
+except ValueError as e:
+    print(e)
