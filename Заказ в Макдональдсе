@@ -1,0 +1,52 @@
+import sys
+from PyQt6.QtWidgets import QApplication, QWidget
+from PyQt6.QtWidgets import QCheckBox, QPlainTextEdit, QPushButton
+
+
+class MacOrder(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.pos1 = QCheckBox('Чизбургер', self)
+        self.pos1.move(50, 60)
+
+        self.pos2 = QCheckBox('Гамбургер', self)
+        self.pos2.move(50, 100)
+
+        self.pos3 = QCheckBox('Кока-кола', self)
+        self.pos3.move(50, 140)
+
+        self.pos4 = QCheckBox('Наггетсы', self)
+        self.pos4.move(50, 180)
+
+        self.menu_checkboxes = [self.pos1, self.pos2, self.pos3, self.pos4]
+
+        self.result = QPlainTextEdit(self)
+        self.result.setEnabled(False)
+        self.result.move(50, 270)
+        self.result.resize(400, 250)
+
+        self.order_btn = QPushButton('Заказать', self)
+        self.order_btn.resize(70, 30)
+        self.order_btn.move(50, 230)
+        self.order_btn.clicked.connect(self.order)
+
+        self.setGeometry(300, 300, 600, 600)
+        self.setWindowTitle('Заказ в Макдональдсе')
+
+    def order(self):
+        self.result.clear()
+        self.result.appendPlainText('Ваш заказ:')
+        self.result.appendPlainText('')
+        for i in self.menu_checkboxes:
+            if i.isChecked():
+                self.result.appendPlainText(i.text())
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = MacOrder()
+    ex.show()
+    sys.exit(app.exec())
