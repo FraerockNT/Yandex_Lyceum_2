@@ -1,0 +1,38 @@
+import sys
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QGridLayout, QPushButton
+
+
+class WidgetArt(QMainWindow):
+    def __init__(self, matrix):
+        super().__init__()
+        self.setWindowTitle('Widget Art')
+        self.setGeometry(100, 100, 600, 400)
+
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        self.widgetArt = QGridLayout(self.central_widget)
+
+        for i, row in enumerate(matrix):
+            for j, value in enumerate(row):
+                button = QPushButton('*' if value == 1 else '')
+                button.setFixedSize(40, 40)
+                self.widgetArt.addWidget(button, i, j)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+
+    matrix = [
+        [1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1],
+        [0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
+        [0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0],
+        [0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
+        [1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1],
+    ]
+
+    ex = WidgetArt(matrix)
+    ex.show()
+    sys.exit(app.exec())
