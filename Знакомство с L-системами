@@ -1,0 +1,95 @@
+import sys
+import math
+from PyQt6.QtWidgets import QWidget, QApplication, QSlider, QFileDialog, QLabel
+from PyQt6.QtGui import QPainter, QColor
+from PyQt6.QtCore import Qt, QPointF
+
+
+class LSystem(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.color = QColor(0, 0, 0)
+        self.initUI()
+
+    def initUI(self):
+        self.setGeometry(0, 0, 1000, 1000)
+        self.setWindowTitle('L-системы')
+
+        self.fname = QFileDialog.getOpenFileName(self, 'Выберите файл', '', 'Файл (*.txt)')[0]
+        self.file_open()
+
+        self.slider = QSlider(self)
+        self.slider.setOrientation(Qt.Orientation.Horizontal)
+        self.slider.setMinimum(1)
+        self.slider.setMaximum(5)
+        self.slider.setGeometry(25, 980, 800, 20)
+        self.slider.valueChanged.connect(self.update)
+
+        self.current_iteration = 1
+
+        self.label = QLabel(self.system_name, self)
+        self.label.setGeometry(25, 950, 800, 20)
+
+    def paintEvent(self, event):
+        qp = QPainter()
+        qp.begin(self)
+        self.draw_l_system(qp)
+        qp.end()
+
+    def draw_l_system(self, qp):
+        qp.setPen(self.color)
+        result = self.axiom
+        angle = 360 / self.angles_division
+        stack = []
+        x0, y0 = 250, 400 
+        length = 20 
+
+        for _ in range(self.current_iteration):
+            next_result = ''
+            for char in result:
+                next_result += self.rules.get(char, char)
+            result = next_result
+
+        alpha = 0
+        for char in result:
+            if char == 'F':
+                x1 = x0 + length * math.cos(math.radians(alpha))
+                y1 = y0 + length * math.sin(math.radians(alpha))
+                qp.drawLine(QPointF(x0, y0), QPointF(x1, y1))
+                x0, y0 = x1, y1
+            elif char == '+':
+                alpha += angle
+            elif char == '-':
+                alpha -= angle
+            elif char == '[':
+                stack.append((x0, y0, alpha))
+            elif char == ']':
+                x0, y0, alpha = stack.pop()
+
+    def update(self):
+        self.current_iteration = self.slider.value()
+        self.repaint()
+
+    def file_open(self):
+        with open(self.fname, 'r', encoding='utf8') as file:
+            lines = file.readlines()
+            self.system_name = lines[0].strip()
+            self.angles_division = int(lines[1].strip())
+            self.axiom = lines[2].strip()
+            self.rules = {}
+            for line in lines[3:]:
+                parts = line.strip().split(' ')
+                if len(parts) == 2:
+                    self.rules[parts[0]] = parts[1]
+
+
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
+
+
+if __name__ == "__main__":
+    sys.excepthook = except_hook
+    app = QApplication(sys.argv)
+    ex = LSystem()
+    ex.show()
+    sys.exit(app.exec())
