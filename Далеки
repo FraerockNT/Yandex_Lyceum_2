@@ -1,0 +1,8 @@
+import sys
+
+s = list(sys.stdin)
+count = 0
+for i in s:
+    if 'далек' in i.lower():
+        count += 1
+print(count)
