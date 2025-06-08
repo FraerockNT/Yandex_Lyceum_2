@@ -1,0 +1,12 @@
+import sys
+ 
+a = 'далек далеки далека далеков далеку далекам ' \
+        'далека далеков далеком далеками далеке далеках'.split()
+count = 0
+ 
+for c in [proposal for proposal in sys.stdin]:
+    for d in c.split():
+        if d.strip(',!.?:\n').lower() in a:
+            count += 1
+            break
+print(count)
