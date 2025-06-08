@@ -1,0 +1,58 @@
+size_units = {
+    'B': 1,
+    'KB': 1024,
+    'MB': 1024 ** 2,
+    'GB': 1024 ** 3,
+    'TB': 1024 ** 4
+}
+
+
+def custom_round(value):
+    integer_part = int(value)
+    fractional_part = value - integer_part
+    if fractional_part >= 0.5:
+        return integer_part + 1
+    else:
+        return integer_part
+
+
+files_by_extension = {}
+
+with open('input.txt', 'r') as f:
+    for line in f:
+        parts = line.split()
+        if len(parts) < 2:
+            continue
+        file_name = parts[0]
+        file_size = int(parts[-2])
+        unit = parts[-1]
+
+        if unit in size_units:
+            size_in_bytes = file_size * size_units[unit]
+            ext = file_name.split('.')[-1]
+
+            if ext not in files_by_extension:
+                files_by_extension[ext] = {'files': [], 'total_size': 0}
+            files_by_extension[ext]['files'].append((file_name, size_in_bytes))
+            files_by_extension[ext]['total_size'] += size_in_bytes
+
+with open('output.txt', 'w') as f2:
+    for ext in sorted(files_by_extension.keys()):
+        group = files_by_extension[ext]
+
+        files = sorted(group['files'], key=lambda x: x[0])
+
+        for file_name, _ in files:
+            f2.write(f"{file_name}\n")
+
+        f2.write("----------\n")
+
+        total_size = group['total_size']
+        unit_index = 0
+        while total_size >= 1024 and unit_index < len(size_units) - 1:
+            total_size /= 1024
+            unit_index += 1
+
+        total_size = custom_round(total_size)
+
+        f2.write(f"Summary: {total_size} {list(size_units.keys())[unit_index]}\n\n")
