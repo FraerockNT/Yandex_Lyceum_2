@@ -1,0 +1,106 @@
+class PasswordError(Exception):
+    pass
+
+
+class LengthError(PasswordError):
+    pass
+
+
+class LetterError(PasswordError):
+    pass
+
+
+class DigitError(PasswordError):
+    pass
+
+
+class SequenceError(PasswordError):
+    pass
+
+
+class WordError(PasswordError):
+    pass
+
+
+def check_password(st):
+    errors = list()
+
+    def check_length(st):
+        try:
+            if len(st) <= 8:
+                raise LengthError
+            return 'ok'
+        except LengthError:
+            errors.append('LengthError')
+
+    def check_letter(st):
+        try:
+            if st == st.lower() or st == st.upper():
+                raise LetterError
+            return 'ok'
+        except LetterError:
+            errors.append('LetterError')
+
+    def check_digit(st):
+        try:
+            flag = False
+            for i in st:
+                if i in '1234567890':
+                    flag = True
+                    break
+            if not flag:
+                raise DigitError
+            return 'ok'
+        except DigitError:
+            errors.append('DigitError')
+
+    def check_sequence(st):
+        try:
+            excombos = ['qwertyuiop', 'asdfghjkl',
+                        'zxcvbnm', 'йцукенгшщзхъ', 'фывапролджэё', 'ячсмитьбю'
+                                                                   'qwertyuiop'[::-1], 'asdfghjkl'[::-1],
+                        'zxcvbnm'[::-1], 'йцукенгшщзхъ'[::-1], 'фывапролджэё'[::-1], 'ячсмитьбю'[::-1]
+                        ]
+
+            for i in (excombos):
+                line = i
+                for i in range(len(st) - 2):
+                    elem = st[i: i + 3].lower()
+                    if elem in line:
+                        raise SequenceError
+            return 'ok'
+        except SequenceError:
+            errors.append('SequenceError')
+
+    def check_word(password):
+        try:
+            for word in dictionary:
+                word = word.strip()
+                password = password.strip()
+                if word in password:
+                    raise WordError
+            return 'ok'
+        except WordError as err:
+            errors.append(err.__class__.__name__)
+
+    check_word(st)
+    check_length(st)
+    check_letter(st)
+    check_digit(st)
+    check_sequence(st)
+
+    for err in errors:
+        dict_of_errors[err] = dict_of_errors.get(err, 0) + 1
+
+
+dict_of_errors = dict()
+dictionary = open('top_1000_words.txt').readlines()
+dict_of_errors['SequenceError'] = 0
+passwords = open('top_10000_passwords.txt', 'r')
+n = 0
+for password in passwords:
+    password.strip()
+    password = password.strip()
+    check_password(password)
+for key in sorted(dict_of_errors.keys()):
+    print(f'{key} - {dict_of_errors[key]}')
