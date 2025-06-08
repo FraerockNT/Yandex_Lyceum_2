@@ -1,0 +1,21 @@
+def check_password(password):
+    if len(password) <= 8:
+        return 'error'
+
+    if not (any(c.isupper() for c in password) and any(c.islower() for c in password)):
+        return 'error'
+
+    if not any(c.isdigit() for c in password):
+        return 'error'
+
+    keyboard_sequences = ['йцукенгшщзхъ', 'фывапролджэё', 'ячсмитьбю',
+                          'qwertyuiop', 'asdfghjkl', 'zxcvbnm']
+    for seq in keyboard_sequences:
+        for i in range(len(seq) - 2):
+            if seq[i:i + 3] in password.lower():
+                return 'error'
+
+    return 'ok'
+
+
+print(check_password(input()))
