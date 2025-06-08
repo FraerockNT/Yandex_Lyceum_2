@@ -1,0 +1,10 @@
+import sys
+
+s = [i.lower().replace('.', '').split() for i in sys.stdin]
+count = 0
+for i in s:
+    for j in i:
+        if j[:5] == 'далек':
+            count += 1
+            break
+print(count)
