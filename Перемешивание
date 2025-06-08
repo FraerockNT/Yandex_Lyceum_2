@@ -1,0 +1,51 @@
+import sys
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextBrowser
+
+
+class Suffle(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('Suffle Lines')
+        self.setGeometry(100, 100, 400, 300)
+
+        layout = QVBoxLayout()
+
+        self.text_field = QTextBrowser(self)
+        layout.addWidget(self.text_field)
+
+        self.button = QPushButton('Load Lines', self)
+        self.button.clicked.connect(self.load_lines)
+        layout.addWidget(self.button)
+
+        self.setLayout(layout)
+
+    def load_lines(self):
+        try:
+            with open('lines.txt', 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+
+            even_lines = []
+            odd_lines = []
+
+            for index, line in enumerate(lines):
+                if (index + 1) % 2 == 0:  
+                    even_lines.append(line.strip())
+                else: 
+                    odd_lines.append(line.strip())
+
+            output = "\n".join(even_lines) + "\n" + "\n".join(odd_lines)  
+
+            self.text_field.setPlainText(output)
+
+        except FileNotFoundError:
+            self.text_field.setPlainText("Файл lines.txt не найден.")
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = Suffle()
+    ex.show()
+    sys.exit(app.exec())
