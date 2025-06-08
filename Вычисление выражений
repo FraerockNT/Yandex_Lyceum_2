@@ -1,0 +1,41 @@
+import sys
+from PyQt6.QtWidgets import QWidget, QApplication, QPushButton, QLineEdit, QLabel
+
+
+class Evaluator(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setGeometry(320, 320, 380, 380)
+        self.setWindowTitle('Вычисление выражений')
+
+        self.lable = QLabel(self)
+        self.lable.setText('Выражение:')
+        self.lable.move(10, 70)
+
+        self.lable = QLabel(self)
+        self.lable.setText('Результат:')
+        self.lable.move(230, 70)
+
+        self.first_value = QLineEdit(self)
+        self.first_value.move(10, 90)
+
+        self.second_value = QLineEdit(self)
+        self.second_value.move(230, 90)
+
+        self.trick_button = QPushButton('->', self)
+        self.trick_button.move(150, 90)
+        self.trick_button.clicked.connect(self.run)
+
+    def run(self):
+        a = eval(self.first_value.text())
+        self.second_value.setText(str(a))
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    wnd = Evaluator()
+    wnd.show()
+    sys.exit(app.exec())
