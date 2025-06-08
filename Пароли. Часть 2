@@ -1,0 +1,43 @@
+class PasswordError(Exception):
+    pass
+
+
+class LengthError(PasswordError):
+    def __init__(self):
+        super().__init__("Длина пароля должна быть не менее 9 символов.")
+
+
+class LetterError(PasswordError):
+    def __init__(self):
+        super().__init__("Пароль должен содержать как минимум одну букву в верхнем и нижнем регистре.")
+
+
+class DigitError(PasswordError):
+    def __init__(self):
+        super().__init__("Пароль должен содержать как минимум одну цифру.")
+
+
+class SequenceError(PasswordError):
+    def __init__(self):
+        super().__init__("Пароль не должен содержать последовательность из трех подряд идущих символов.")
+
+
+def check_password(password):
+
+    if len(password) < 9:
+        raise LengthError()
+
+    if not (any(c.isupper() for c in password) and any(c.islower() for c in password)):
+        raise LetterError()
+
+    if not any(c.isdigit() for c in password):
+        raise DigitError()
+
+    keyboard_sequences = ['йцукенгшщзхъ', 'фывапролджэё', 'ячсмитьбю',
+                          'qwertyuiop', 'asdfghjkl', 'zxcvbnm']
+    for seq in keyboard_sequences:
+        for i in range(len(seq) - 2):
+            if seq[i:i + 3] in password.lower():
+                raise SequenceError()
+
+    return 'ok'
