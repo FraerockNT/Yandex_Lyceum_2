@@ -1,0 +1,54 @@
+class PasswordError(Exception):
+    pass
+
+
+class LengthError(PasswordError):
+    pass
+
+
+class LetterError(PasswordError):
+    pass
+
+
+class DigitError(PasswordError):
+    pass
+
+
+class SequenceError(PasswordError):
+    pass
+
+
+def check_password(password):
+    if len(password) < 9:
+        raise LengthError()
+
+    if not (any(c.isupper() for c in password) and any(c.islower() for c in password)):
+        raise LetterError()
+
+    if not any(c.isdigit() for c in password):
+        raise DigitError()
+
+    keyboard_sequences = ['йцукенгшщзхъ', 'фывапролджэё', 'ячсмитьбю',
+                          'qwertyuiop', 'asdfghjkl', 'zxcvbnm']
+    for seq in keyboard_sequences:
+        for i in range(len(seq) - 2):
+            if seq[i:i + 3] in password.lower():
+                raise SequenceError()
+
+    return 'ok'
+
+
+while True:
+    try:
+        password = input()
+
+        if password == "Ctrl+Break":
+            raise KeyboardInterrupt
+        result = check_password(password)
+        print(result)
+        break
+    except KeyboardInterrupt:
+        print('Bye-Bye')
+        break
+    except PasswordError as e:
+        print(e.__class__.__name__)
