@@ -10,7 +10,6 @@ for i in sorted_hours:
             sum_i = sum(int(digit) for digit in str(i))
             sum_m = sum(int(digit) for digit in str(m))
  
-            # Проверяем, что суммы не совпадают
             if sum_i != sum_m:
                 if len(str(m)) == 1:
                     print(*{f"0{i}:0{m}"})
@@ -20,8 +19,7 @@ for i in sorted_hours:
         for k in sorted_strings:
             sum_i = sum(int(digit) for digit in str(i))
             sum_m = sum(int(digit) for digit in str(k))
- 
-            # Проверяем, что суммы не совпадают
+
             if sum_i != sum_m:
                 if len(str(k)) == 1:
                     print(*{f"{i}:0{k}"})
