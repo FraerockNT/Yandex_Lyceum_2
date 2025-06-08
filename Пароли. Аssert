@@ -1,0 +1,28 @@
+def check_password(password):
+    try:
+        assert len(password) > 8, "Пароль должен содержать более 8 символов."
+
+        assert any(c.islower() for c in password), "Пароль должен содержать хотя бы одну строчную букву."
+        assert any(c.isupper() for c in password), "Пароль должен содержать хотя бы одну заглавную букву."
+
+        assert any(c.isdigit() for c in password), "Пароль должен содержать хотя бы одну цифру."
+
+        keyboard_patterns = [
+            "qwertyuiop", "asdfghjkl", "zxcvbnm",
+            "йцукенгшщз", "фывапролджэ", "ячсмитьбю"
+        ]
+
+        for pattern in keyboard_patterns:
+            for i in range(len(pattern) - 2):
+                if pattern[i:i + 3] in password.lower():
+                    raise AssertionError()
+        return "ok"
+
+    except AssertionError:
+        return f"error"
+    except Exception:
+        return f"error"
+
+
+result = check_password(input())
+print(result)
