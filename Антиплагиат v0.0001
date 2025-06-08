@@ -1,0 +1,79 @@
+import sys
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QVBoxLayout, QLabel, QDoubleSpinBox,
+    QPlainTextEdit, QPushButton, QStatusBar, QWidget
+)
+
+
+class AntiPlagiarism(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Проверка на антиплагиат")
+        self.setGeometry(100, 100, 600, 400)
+
+        self.central_widget = QWidget(self)
+        self.setCentralWidget(self.central_widget)
+
+        layout = QVBoxLayout(self.central_widget)
+
+        self.alert_value = QDoubleSpinBox(self)
+        self.alert_value.setRange(0, 100)
+        self.alert_value.setValue(0)
+        self.alert_value.setSingleStep(0.01)
+        layout.addWidget(QLabel("Порог срабатывания антиплагиата (%):"))
+        layout.addWidget(self.alert_value)
+
+        self.text1 = QPlainTextEdit(self)
+        self.text2 = QPlainTextEdit(self)
+        layout.addWidget(QLabel("Текст 1:"))
+        layout.addWidget(self.text1)
+        layout.addWidget(QLabel("Текст 2:"))
+        layout.addWidget(self.text2)
+
+        self.checkBtn = QPushButton("Проверить", self)
+        self.checkBtn.clicked.connect(self.check_plagiarism)
+        layout.addWidget(self.checkBtn)
+
+        self.statusbar = QStatusBar(self)
+        self.setStatusBar(self.statusbar)
+
+    def check_plagiarism(self):
+        text1_lines = set(self.text1.toPlainText().strip().splitlines())
+        text2_lines = set(self.text2.toPlainText().strip().splitlines())
+
+        if len(text1_lines) == 0 and len(text2_lines) == 0:
+            common_lines = 1
+            total_unique_lines = 1
+            similarity_percentage = (common_lines / total_unique_lines) * 100
+
+        elif len(text1_lines) == 0:
+            common_lines = 1
+            total_unique_lines = len(text2_lines)
+            similarity_percentage = (common_lines / total_unique_lines) * 100
+
+        elif len(text2_lines) == 0:
+            common_lines = 1
+            total_unique_lines = len(text1_lines)
+            similarity_percentage = (common_lines / total_unique_lines) * 100
+
+        else:
+            common_lines = text1_lines.intersection(text2_lines)
+            total_unique_lines = len(text1_lines.union(text2_lines))
+            similarity_percentage = (len(common_lines) / total_unique_lines) * 100
+
+        threshold = self.alert_value.value()
+
+        if similarity_percentage >= threshold:
+            message = f"Тексты похожи на {similarity_percentage:.2f}%, плагиат"
+        else:
+            message = f"Тексты похожи на {similarity_percentage:.2f}%, не плагиат"
+
+        self.statusbar.showMessage(message)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = AntiPlagiarism()
+    window.show()
+    sys.exit(app.exec())
