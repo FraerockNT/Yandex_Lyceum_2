@@ -1,0 +1,5 @@
+def reverse():
+    f1 = open("input.dat", "rb")
+    data = f1.read()
+    f2 = open('output.dat', 'wb')
+    f2.write(data[::-1])
