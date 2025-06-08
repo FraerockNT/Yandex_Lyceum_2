@@ -1,0 +1,20 @@
+import sys
+ 
+sk, count = [], {}
+for i in sys.stdin:
+    i = (i.split())
+    if len(i) == 3:
+        sk.append([int(i[2]), i[0] + ' ' + i[1]])
+    elif len(i) == 2:
+        sk.append([int(i[1]), i[0]])
+for i in range(len(sk) - 1):
+    for j in range(len(sk) - i - 1):
+        if sk[j][0] > sk[j + 1][0]:
+            sk[j], sk[j + 1] = sk[j + 1], sk[j]
+for i in sk:
+    if i[0] not in count:
+        count[i[0]] = i[1]
+    elif i[0] in count and i[1] not in count[i[0]]:
+        count[i[0]] += ', ' + i[1]
+for key, val in count.items():
+    print(str(key) + ': ' + val)
