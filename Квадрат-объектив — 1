@@ -1,0 +1,99 @@
+import sys
+from PyQt6.QtWidgets import (
+    QApplication,
+    QWidget,
+    QPushButton,
+    QLineEdit,
+    QLabel,
+    QVBoxLayout,
+    QHBoxLayout,
+)
+from PyQt6.QtGui import QPainter, QPen, QColor
+from PyQt6.QtCore import QRectF
+
+
+class Square1(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setFixedSize(800, 900)
+
+        self.label_a = QLabel("Размер стороны квадрата (по умолчанию 300):")
+        self.lineEdit = QLineEdit("300")
+
+        self.label_k = QLabel("Коэффициент масштабирования (по умолчанию 0.9):")
+        self.lineEdit_2 = QLineEdit("0.9")
+
+        self.label_n = QLabel("Количество квадратов (по умолчанию 10):")
+        self.lineEdit_3 = QLineEdit("10")
+
+        self.btn = QPushButton("Рисовать")
+        self.btn.clicked.connect(self.draw_squares)
+
+        self.color = QColor(255, 0, 0)
+
+        layout_top = QHBoxLayout()
+        layout_top.addWidget(self.label_a)
+        layout_top.addWidget(self.lineEdit)
+        layout_top.addWidget(self.label_k)
+        layout_top.addWidget(self.lineEdit_2)
+        layout_top.addWidget(self.label_n)
+        layout_top.addWidget(self.lineEdit_3)
+        layout_top.addStretch()
+
+        layout_bottom = QVBoxLayout()
+        layout_bottom.addLayout(layout_top)
+        layout_bottom.addWidget(self.btn)
+        layout_bottom.addStretch()
+
+        self.setLayout(layout_bottom)
+
+        self.should_draw = False
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        if not self.should_draw:
+            return
+
+        try:
+            a = float(self.lineEdit.text())
+            k = float(self.lineEdit_2.text())
+            n = int(self.lineEdit_3.text())
+
+            if k >= 1 or k <= 0:
+                raise ValueError("Коэффициент масштабирования должен быть больше 0 и меньше 1.")
+            if n <= 0:
+                raise ValueError("Количество квадратов должно быть больше 0.")
+
+        except ValueError as e:
+            print(f"Ошибка ввода: {e}")
+            return
+
+        pen = QPen(self.color)
+        painter.setPen(pen)
+
+        x_top_left = 50
+        y_top_left = 130
+
+        for i in range(n):
+            size = a * (k ** i)
+            rect = QRectF(
+                x_top_left,
+                y_top_left,
+                size,
+                size,
+            )
+            painter.drawRect(rect)
+            x_top_left += (size - (a * (k ** (i + 1)))) / 2  
+            y_top_left += (size - (a * (k ** (i + 1)))) / 2 
+
+    def draw_squares(self):
+        self.should_draw = True
+        self.update()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = Square1()
+    window.show()
+    sys.exit(app.exec())
