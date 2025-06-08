@@ -1,0 +1,46 @@
+import sys
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QListWidget, QListWidgetItem
+
+
+class MyNotes(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("My Notes")
+        self.setGeometry(300, 300, 300, 300)
+
+        layout = QVBoxLayout()
+
+        self.contactName = QLineEdit()
+        layout.addWidget(self.contactName)
+
+        self.contactNumber = QLineEdit()
+        layout.addWidget(self.contactNumber)
+
+        self.addContactBtn = QPushButton("Добавить")
+        self.addContactBtn.clicked.connect(self.addContact)
+        layout.addWidget(self.addContactBtn)
+
+        self.contactList = QListWidget()
+        layout.addWidget(self.contactList)
+
+        self.setLayout(layout)
+
+    def addContact(self):
+        name = self.contactName.text()
+        number = self.contactNumber.text()
+        if name and number:
+            item = QListWidgetItem(f"{name} {number}")
+            self.contactList.addItem(item)
+            self.contactName.clear()
+            self.contactNumber.clear()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    notes = MyNotes()
+    notes.show()
+    sys.exit(app.exec())
