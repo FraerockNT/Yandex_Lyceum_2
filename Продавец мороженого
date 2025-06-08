@@ -1,0 +1,27 @@
+prices = dict()
+for _ in range(int(input())):
+    s = input().split('\t')
+    prices[s[0]] = int(s[1])
+empty = input()
+buy = input()
+final = 0
+order_sum = 0
+c = 1
+order_was = False
+while buy != '.':
+    if len(buy) == 0:
+        if order_was:
+            print(f'{c}) {order_sum}')
+            c += 1
+            final += order_sum
+            order_sum = 0
+            order_was = False
+    else:
+        order_was = True
+        buy = buy.split('\t')
+        order_sum += prices[buy[0]] * int(buy[1])
+    buy = input()
+if order_sum != 0:
+    print(f'{c}) {order_sum}')
+    final += order_sum
+print(f'Итого: {final}')
