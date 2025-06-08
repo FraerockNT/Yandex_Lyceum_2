@@ -1,0 +1,13 @@
+class Note:
+    long_uncommon = {'ре': 'ре-э', 'соль': 'со-оль', 'ля': 'ля-а'}
+
+    def __init__(self, pitch, is_long=False):
+        self.pitch = pitch
+        self.is_long = is_long
+
+    def __str__(self):
+        if not self.is_long:
+            return self.pitch
+        if self.pitch in Note.long_uncommon:
+            return Note.long_uncommon[self.pitch]
+        return self.pitch + '-' + self.pitch[-1]
