@@ -1,0 +1,79 @@
+import sys
+from PyQt6.QtWidgets import (
+    QApplication, QWidget, QLineEdit, QPushButton, QLabel
+)
+
+
+class Arifmometr(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.initUI()
+
+    def initUI(self):
+        self.setGeometry(300, 300, 400, 200)
+        self.setWindowTitle('Арифмометр')
+
+        self.first_value = QLineEdit('0', self)
+        self.first_value.resize(80, 25)
+        self.first_value.move(0, 90)
+
+        self.add_button = QPushButton('+', self)
+        self.add_button.resize(40, 25)
+        self.add_button.move(80, 90)
+        self.add_button.clicked.connect(self.add)
+
+        self.substract_button = QPushButton('-', self)
+        self.substract_button.resize(40, 25)
+        self.substract_button.move(115, 90)
+        self.substract_button.clicked.connect(self.substract)
+
+        self.multiply_button = QPushButton('*', self)
+        self.multiply_button.resize(40, 25)
+        self.multiply_button.move(155, 90)
+        self.multiply_button.clicked.connect(self.multiply)
+
+        self.second_value = QLineEdit('0', self)
+        self.second_value.resize(80, 25)
+        self.second_value.move(200, 90)
+
+        self.label = QLabel(self)
+        self.label.setText('=')
+        self.label.resize(40, 25)
+        self.label.move(285, 90)
+
+        self.result = QLineEdit('0', self)
+        self.result.setReadOnly(True)
+        self.result.resize(80, 25)
+        self.result.move(300, 90)
+
+    def add(self):
+        try:
+            first = int(self.first_value.text())
+            second = int(self.second_value.text())
+            self.result.setText(str(first + second))
+        except ValueError:
+            self.result.setText('Ошибка')
+
+    def substract(self):
+        try:
+            first = int(self.first_value.text())
+            second = int(self.second_value.text())
+            self.result.setText(str(first - second))
+        except ValueError:
+            self.result.setText('Ошибка')
+
+    def multiply(self):
+        try:
+            first = int(self.first_value.text())
+            second = int(self.second_value.text())
+            self.result.setText(str(first * second))
+        except ValueError:
+            self.result.setText('Ошибка')
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = Arifmometr()
+    ex.show()
+    sys.exit(app.exec())
