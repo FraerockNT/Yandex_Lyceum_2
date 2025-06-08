@@ -1,0 +1,83 @@
+import sys
+from copy import deepcopy
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton
+from PyQt6.QtGui import QPainter, QColor, QPolygonF
+from PyQt6 import QtCore
+
+
+class Square2(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Square Drawer")
+        self.setFixedSize(500, 500)
+        self.centralwidget = QWidget(self)
+        self.setCentralWidget(self.centralwidget)
+
+        self.label_k = QLabel("k = ", self)
+        self.label_k.move(10, 10)
+        self.k = QLineEdit(self)
+        self.k.move(40, 10)
+        self.k.setFixedWidth(50)
+
+        self.label_n = QLabel("n = ", self)
+        self.label_n.move(110, 10)
+        self.n = QLineEdit(self)
+        self.n.move(140, 10)
+        self.n.setFixedWidth(50)
+
+        self.draw = QPushButton("Draw", self)
+        self.draw.move(210, 10)
+        self.draw.setFixedWidth(100)
+
+        self.do_paint = False
+        self.color = QColor(255, 0, 0)
+        self.coords = [(150.0, 150.0), (350.0, 150.0), (350.0, 350.0), (150.0, 350.0)]
+
+        self.draw.clicked.connect(self.paint)
+
+    def paintEvent(self, event):
+        if self.do_paint:
+            qp = QPainter()
+            qp.begin(self)
+            self.draw_square(qp)
+            qp.end()
+
+    def paint(self):
+        self.do_paint = True
+        self.coords = [(150.0, 150.0), (350.0, 150.0), (350.0, 350.0), (150.0, 350.0)]
+
+        try:
+            self.K = float(self.k.text())
+            self.N = int(self.n.text())
+            if self.K >= 1:
+                raise ValueError("Коэффициент k должен быть меньше 1.")
+            self.repaint()
+        except ValueError as e:
+            print(f"Ошибка: {e}")
+            self.do_paint = False
+
+    def draw_square(self, qp):
+        self.do_paint = False
+        for _ in range(self.N):
+            new_coords = []
+            for j in range(4):
+                new_coords.append((
+                    self.coords[j][0] + (1 - self.K) * (self.coords[(j + 1) % 4][0] - self.coords[j][0]),
+                    self.coords[j][1] + (1 - self.K) * (self.coords[(j + 1) % 4][1] - self.coords[j][1])
+                ))
+
+            polygon = QPolygonF()
+            for point in new_coords:
+                polygon.append(QtCore.QPointF(point[0], point[1]))
+
+            qp.setPen(self.color)
+            qp.drawPolygon(polygon)
+
+            self.coords = deepcopy(new_coords)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    mywindow = Square2()
+    mywindow.show()
+    sys.exit(app.exec())
