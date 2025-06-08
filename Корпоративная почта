@@ -1,0 +1,17 @@
+all_mail = []
+new = []
+for i in range(int(input())):
+    mail = input().split('@')
+    all_mail.append(mail[0])
+for i in range(int(input())):
+    name = input()
+    if name in all_mail:
+        count = 0
+        for j in all_mail:
+            if name in j:
+                count += 1
+        all_mail.append(name)
+        print(f'{name}{count}@untitled.py')
+    else:
+        print(f'{name}@untitled.py')
+        all_mail.append(name)
