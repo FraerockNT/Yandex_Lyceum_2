@@ -1,0 +1,9 @@
+string = input().split()
+for i in range(int(input())):
+    s = input()
+    if string.index(s) == 0:
+        print(*string[:3])
+    elif string.index(s) == -1:
+        print(*string[-3:-1])
+    else:
+        print(*string[string.index(s) - 2:string.index(s) + 3])
