@@ -1,0 +1,23 @@
+def check_tel(s):
+    s = s.strip()
+    s = ''.join(s.split())
+    if s.startswith('+7'):
+        s = s[2:]
+    elif s.startswith('8'):
+        s = s[1:]
+    else:
+        return 'error'
+    if s.endswith('-') or '--' in s:
+        return 'error'
+    s = ''.join(s.split('-'))
+    ss = ''.join(x for x in s if x in '()')
+    if ss not in ['', '()']:
+        return 'error'
+    s = s.replace('(', '')
+    s = s.replace(')', '')
+    if not s.isdigit() or len(s) != 10:
+        return 'error'
+    return '+7' + s
+
+
+print(check_tel(input()))
