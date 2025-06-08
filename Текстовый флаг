@@ -1,0 +1,87 @@
+import sys
+from PyQt6.QtWidgets import (
+    QApplication, QWidget, QRadioButton, QButtonGroup, QPushButton, QLabel,
+    QVBoxLayout, QHBoxLayout
+)
+
+
+class FlagMaker(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.initUI()
+
+    def initUI(self):
+        self.setFixedSize(300, 200)
+        self.setWindowTitle('Текстовый флаг')
+
+        layout = QVBoxLayout()
+
+        self.color_group_1 = QButtonGroup()
+        self.color_group_2 = QButtonGroup()
+        self.color_group_3 = QButtonGroup()
+
+        self.color_buttons_1 = [
+            QRadioButton('Синий'),
+            QRadioButton('Красный'),
+            QRadioButton('Зелёный')
+        ]
+
+        self.color_buttons_2 = [
+            QRadioButton('Синий'),
+            QRadioButton('Красный'),
+            QRadioButton('Зелёный')
+        ]
+
+        self.color_buttons_3 = [
+            QRadioButton('Синий'),
+            QRadioButton('Красный'),
+            QRadioButton('Зелёный')
+        ]
+
+        for i, button in enumerate(self.color_buttons_1):
+            self.color_group_1.addButton(button, i)
+        for i, button in enumerate(self.color_buttons_2):
+            self.color_group_2.addButton(button, i)
+        for i, button in enumerate(self.color_buttons_3):
+            self.color_group_3.addButton(button, i)
+
+        layout_colors_1 = QVBoxLayout()
+        layout_colors_2 = QVBoxLayout()
+        layout_colors_3 = QVBoxLayout()
+
+        for button in self.color_buttons_1:
+            layout_colors_1.addWidget(button)
+        for button in self.color_buttons_2:
+            layout_colors_2.addWidget(button)
+        for button in self.color_buttons_3:
+            layout_colors_3.addWidget(button)
+
+        layout_colors = QHBoxLayout()
+        layout_colors.addLayout(layout_colors_1)
+        layout_colors.addLayout(layout_colors_2)
+        layout_colors.addLayout(layout_colors_3)
+
+        self.make_flag = QPushButton('Сделать флаг')
+        self.make_flag.clicked.connect(self.generateFlag)
+
+        self.result = QLabel()
+
+        layout.addLayout(layout_colors)
+        layout.addWidget(self.make_flag)
+        layout.addWidget(self.result)
+
+        self.setLayout(layout)
+
+    def generateFlag(self):
+        color1 = self.color_buttons_1[self.color_group_1.checkedId()].text()
+        color2 = self.color_buttons_2[self.color_group_2.checkedId()].text()
+        color3 = self.color_buttons_3[self.color_group_3.checkedId()].text()
+        self.result.setText('Цвета: ' + color1 + ', ' + color2 + ' и ' + color3)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = FlagMaker()
+    ex.show()
+    sys.exit(app.exec())
