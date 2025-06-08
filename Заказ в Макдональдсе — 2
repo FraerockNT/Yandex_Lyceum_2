@@ -1,0 +1,107 @@
+import sys
+from PyQt6.QtWidgets import QApplication, QWidget, QCheckBox, QPlainTextEdit, QPushButton, QLineEdit
+
+
+class MyWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.checkboxes = []
+        self.inputs = []
+
+        self.pos1 = QCheckBox('Чизбургер', self)
+        self.pos1.move(50, 60)
+        self.pos1.stateChanged.connect(self.enable_input)
+        self.checkboxes.append(self.pos1)
+
+        self.input1 = QLineEdit('0', self)
+        self.input1.move(150, 60)
+        self.input1.resize(50, 20)
+        self.input1.setEnabled(False)
+        self.inputs.append(self.input1)
+
+        self.pos2 = QCheckBox('Гамбургер', self)
+        self.pos2.move(50, 100)
+        self.pos2.stateChanged.connect(self.enable_input)
+        self.checkboxes.append(self.pos2)
+
+        self.input2 = QLineEdit('0', self)
+        self.input2.move(150, 100)
+        self.input2.resize(50, 20)
+        self.input2.setEnabled(False)
+        self.inputs.append(self.input2)
+
+        self.pos3 = QCheckBox('Кока-кола', self)
+        self.pos3.move(50, 140)
+        self.pos3.stateChanged.connect(self.enable_input)
+        self.checkboxes.append(self.pos3)
+
+        self.input3 = QLineEdit('0', self)
+        self.input3.move(150, 140)
+        self.input3.resize(50, 20)
+        self.input3.setEnabled(False)
+        self.inputs.append(self.input3)
+
+        self.pos4 = QCheckBox('Наггетсы', self)
+        self.pos4.move(50, 180)
+        self.pos4.stateChanged.connect(self.enable_input)
+        self.checkboxes.append(self.pos4)
+
+        self.input4 = QLineEdit('0', self)
+        self.input4.move(150, 180)
+        self.input4.resize(50, 20)
+        self.input4.setEnabled(False)
+        self.inputs.append(self.input4)
+
+        self.orderButton = QPushButton('Заказать', self)
+        self.orderButton.resize(70, 30)
+        self.orderButton.move(50, 230)
+        self.orderButton.clicked.connect(self.order)
+
+        self.order = QPlainTextEdit(self)
+        self.order.setEnabled(False)
+        self.order.move(50, 270)
+        self.order.resize(400, 250)
+
+        self.setGeometry(300, 300, 600, 600)
+        self.setWindowTitle('Заказ в Макдональдсе')
+
+    def enable_input(self, state):
+        checkbox = self.sender()
+        index = self.checkboxes.index(checkbox)
+        self.inputs[index].setEnabled(state == 2)
+        if state == 2:
+            self.inputs[index].setText('1')
+        else:
+            self.inputs[index].clear()
+
+    def order(self):
+        self.order.clear()
+        self.order.appendPlainText('Ваш заказ\n')
+
+        prices = {
+            'Чизбургер': 10,
+            'Гамбургер': 20,
+            'Кока-кола': 15,
+            'Наггетсы': 30
+        }
+
+        total_cost = 0
+        for i, checkbox in enumerate(self.checkboxes):
+            if checkbox.isChecked():
+                dish_name = checkbox.text()
+                quantity = int(self.inputs[i].text()) if self.inputs[i].text() else 1
+                cost = prices[dish_name] * quantity
+                total_cost += cost
+                self.order.appendPlainText(f'{dish_name}-----{quantity}-----{cost}')
+
+        self.order.appendPlainText('\n' + 'Итого: ' + str(total_cost))
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = MyWidget()
+    ex.show()
+    sys.exit(app.exec())
