@@ -1,0 +1,45 @@
+from PyQt6.QtCore import QRectF, Qt
+from PyQt6.QtWidgets import QApplication, QSlider, QMainWindow
+from PyQt6.QtGui import QPainter, QColor
+import sys
+
+
+class GoodMoodRising(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setGeometry(100, 100, 1000, 1000)
+        self.setWindowTitle('Рост хорошего настроения')
+
+        self.color = QColor(255, 0, 0)
+
+        self.slider = QSlider(self)
+        self.slider.setOrientation(Qt.Orientation.Vertical)  
+        self.slider.setGeometry(970, 40, 20, 500)
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(100)
+        self.slider.setValue(50)
+        self.slider.valueChanged.connect(self.update)
+
+    def draw_smile(self, qp, size):
+        qp.setPen(self.color)
+        qp.drawEllipse(0, 0, 10 * size, 10 * size)
+
+        qp.drawEllipse(2 * size, 2 * size, 2 * size, 2 * size)
+        qp.drawEllipse(6 * size, 2 * size, 2 * size, 2 * size) 
+
+        qp.drawArc(QRectF(2 * size, 6 * size, 6 * size, 2 * size), -480 * 16, -1920 * 16)
+
+    def paintEvent(self, event):
+        qp = QPainter()
+        qp.begin(self)
+        size = self.slider.value()
+        qp.scale(size / 50, size / 50) 
+        self.draw_smile(qp, size)
+        qp.end()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = GoodMoodRising()
+    ex.show()
+    sys.exit(app.exec())
