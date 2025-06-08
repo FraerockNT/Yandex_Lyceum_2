@@ -1,0 +1,63 @@
+import sys
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QWidget, QSlider, QLabel, QVBoxLayout, QPushButton
+from PIL import Image
+
+
+class AlphaManagement(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setGeometry(100, 100, 500, 510)
+        self.setWindowTitle('Изменение прозрачности')
+
+        layout = QVBoxLayout()
+
+        self.load_button = QPushButton('Загрузить изображение', self)
+        self.load_button.clicked.connect(self.load_image)
+        layout.addWidget(self.load_button)
+
+        self.alpha = QSlider(Qt.Orientation.Vertical, self)  
+        self.alpha.setMinimum(0) 
+        self.alpha.setMaximum(255)  
+        self.alpha.setValue(255)  
+        self.alpha.valueChanged[int].connect(self.update_transparency) 
+        layout.addWidget(self.alpha)
+
+        self.image = QLabel(self)  
+        layout.addWidget(self.image)
+
+        self.setLayout(layout)
+
+        self.fname = 'orig.jpg' 
+        self.pixmap = None  
+
+        self.load_image()
+
+    def load_image(self):
+        try:
+            self.pixmap = QPixmap(self.fname)
+            if self.pixmap.isNull():
+                raise ValueError("Не удалось загрузить изображение.")
+            self.image.setPixmap(self.pixmap) 
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+    def update_transparency(self, value):
+        if self.pixmap:
+            im = Image.open(self.fname).convert('RGBA')
+            alpha = value 
+            im.putalpha(alpha)
+            im.save('new.png')
+            self.pixmap = QPixmap('new.png')
+            self.image.setPixmap(self.pixmap)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = AlphaManagement()
+    ex.show()
+    sys.exit(app.exec())
