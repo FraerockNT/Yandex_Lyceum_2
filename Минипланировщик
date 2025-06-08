@@ -1,0 +1,53 @@
+import sys
+from PyQt6.QtWidgets import (
+    QApplication, QWidget, QGridLayout, QCalendarWidget, QTimeEdit, QListWidget, QPushButton,
+    QLineEdit
+)
+
+
+class SimplePlanner(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.initUI()
+
+    def initUI(self):
+        self.setGeometry(300, 300, 400, 300)
+        self.setWindowTitle('Simple Planner')
+
+        gridLayout = QGridLayout()
+        self.setLayout(gridLayout)
+
+        self.calendarWidget = QCalendarWidget()
+        gridLayout.addWidget(self.calendarWidget, 0, 0, 1, 2)
+
+        self.timeEdit = QTimeEdit()
+        gridLayout.addWidget(self.timeEdit, 1, 0)
+
+        self.eventNameEdit = QLineEdit()
+        self.lineEdit = self.eventNameEdit
+        gridLayout.addWidget(self.eventNameEdit, 1, 1)
+
+        self.addEventBtn = QPushButton('Добавить')
+        gridLayout.addWidget(self.addEventBtn, 2, 0, 1, 2)
+        self.addEventBtn.clicked.connect(self.addEvent)
+
+        self.eventList = QListWidget()
+        gridLayout.addWidget(self.eventList, 3, 0, 1, 2)
+
+        self.show()
+
+    def addEvent(self):
+        eventName = self.eventNameEdit.text()
+        eventDate = self.calendarWidget.selectedDate()
+        eventTime = self.timeEdit.time()
+        eventString = f"{eventDate.toString('yyyy-MM-dd')} {eventTime.toString('hh:mm:ss')} - {eventName}"
+
+        self.eventList.addItem(eventString)
+        self.eventList.sortItems()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    planner = SimplePlanner()
+    sys.exit(app.exec())
