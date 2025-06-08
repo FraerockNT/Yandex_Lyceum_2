@@ -1,0 +1,46 @@
+import sys
+from PyQt6.QtWidgets import QApplication, QWidget, QTextEdit, QPushButton, QVBoxLayout
+from PyQt6.QtCore import Qt
+import random
+
+
+class RandomString(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setGeometry(300, 300, 300, 200)
+        self.setWindowTitle('Случайная строка из файла')
+
+        layout = QVBoxLayout()
+
+        self.text_field = QTextEdit()
+        self.text_field.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.text_field)
+
+        self.button = QPushButton('Получить случайную строку')
+        self.button.clicked.connect(self.getRandomString)
+        layout.addWidget(self.button)
+
+        self.setLayout(layout)
+
+    def getRandomString(self):
+        try:
+            with open('lines.txt', 'r') as file:
+                lines = file.readlines()
+                if lines:
+                    random_line = random.choice(lines).strip()
+                    self.text_field.setText(random_line)
+                else:
+                    self.text_field.clear()
+                    self.text_field.setText('')  # Добавлено это условие
+        except FileNotFoundError:
+            self.text_field.setText('Файл lines.txt не найден')
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = RandomString()
+    ex.show()
+    sys.exit(app.exec())
