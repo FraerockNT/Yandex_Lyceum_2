@@ -1,0 +1,12 @@
+import sqlite3
+
+con = sqlite3.connect(input())
+cur = con.cursor()
+
+result = cur.execute("""SELECT title, duration  FROM Films
+WHERE duration <= 85""").fetchall()
+
+for i in result:
+    print(i[0])
+
+con.close
