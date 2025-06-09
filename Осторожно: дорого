@@ -1,0 +1,115 @@
+import sys
+import csv
+import random
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QPushButton,
+    QVBoxLayout, QWidget, QLabel
+)
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QBrush, QColor
+
+
+class Expensive(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setGeometry(500, 250, 600, 400)
+        self.setWindowTitle('Expensive Items')
+
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        self.layout = QVBoxLayout(self.central_widget)
+
+        self.tableWidget = QTableWidget(self)
+        self.layout.addWidget(self.tableWidget)
+
+        self.updateButton = QPushButton("Обновить цвета", self)
+        self.updateButton.clicked.connect(self.update_colors)
+        self.layout.addWidget(self.updateButton)
+
+        self.totalSumLabel = QLabel("Итоговая сумма: 0")
+        self.layout.addWidget(self.totalSumLabel)
+
+        self.load_data()
+
+        self.tableWidget.cellChanged.connect(self.cell_changed)
+
+    def load_data(self):
+        try:
+            with open("price.csv", mode="r", encoding="UTF-8") as input_file:
+                reader = csv.reader(input_file, delimiter=";", quotechar='"')
+                next(reader)
+                self.data = []
+                for row in reader:
+                    if len(row) >= 2:
+                        try:
+                            name = row[0].strip()
+                            value = int(row[1].strip())
+                            quantity = 0
+                            self.data.append([name, value, quantity])
+                        except ValueError:
+                            print(f"Ошибка преобразования строки: {row}")
+
+            self.data.sort(key=lambda x: x[1], reverse=True)
+
+            self.update_table()
+            self.update_total_sum_display()
+            self.update_colors()
+
+        except FileNotFoundError:
+            print("Файл price.csv не найден.")
+        except Exception as e:
+            print(f"Ошибка при загрузке данных: {e}")
+
+    def update_table(self):
+        self.tableWidget.setRowCount(len(self.data))
+        self.tableWidget.setColumnCount(3)
+        self.tableWidget.setHorizontalHeaderLabels(['Название', 'Цена', 'Количество'])
+
+        for index, (name, value, quantity) in enumerate(self.data):
+            self.tableWidget.setItem(index, 0, QTableWidgetItem(name))
+            self.tableWidget.setItem(index, 1, QTableWidgetItem(str(value)))
+            quantity_item = QTableWidgetItem(str(quantity))
+            self.tableWidget.setItem(index, 2, quantity_item)
+
+            quantity_item.setFlags(quantity_item.flags() | Qt.ItemFlag.ItemIsEditable)
+
+    def cell_changed(self, row, column):
+        if column == 2:
+            try:
+                new_quantity = int(self.tableWidget.item(row, column).text())
+                self.data[row][2] = new_quantity
+                self.update_total_sum_display()
+            except ValueError:
+                print("Некорректное значение. Пожалуйста, введите целое число.")
+
+    def calculate_total_sum(self):
+        total_sum = sum(item[1] * item[2] for item in self.data)
+        return total_sum
+
+    def update_total_sum_display(self):
+        total_sum = self.calculate_total_sum()
+        self.totalSumLabel.setText(f"Итоговая сумма: {total_sum}")
+
+    def update_colors(self):
+        top_prices = sorted(self.data, key=lambda x: x[1], reverse=True)[:5]
+        top_names = [item[0] for item in top_prices]
+
+        for row in range(self.tableWidget.rowCount()):
+            item = self.tableWidget.item(row, 0)
+            if item is not None:
+                item_name = item.text()
+                if item_name in top_names:
+                    color = QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                    brush = QBrush(color)
+                    for col in range(self.tableWidget.columnCount()):
+                        self.tableWidget.item(row, col).setBackground(brush)
+                else:
+                    for col in range(self.tableWidget.columnCount()):
+                        self.tableWidget.item(row, col).setBackground(QBrush(Qt.GlobalColor.white))
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = Expensive()
+    window.show()
+    sys.exit(app.exec())
