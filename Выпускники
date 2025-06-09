@@ -1,0 +1,8 @@
+import csv
+ 
+constanta = int(input())
+with open('vps.csv', 'r', encoding='utf8') as input_file:
+    reader = csv.reader(input_file, delimiter=";")
+    for row in list(reader)[1:]:
+        if int(row[-2]) >= constanta:
+            print(row[0])
