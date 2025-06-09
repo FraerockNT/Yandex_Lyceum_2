@@ -1,0 +1,113 @@
+import sqlite3
+import sys
+from PyQt6 import QtCore, QtWidgets
+
+
+class MyWidget(QtWidgets.QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Поиск фильмов")
+        self.resize(600, 400)
+
+        self.con = sqlite3.connect("films_db.sqlite")
+
+        self.parameterSelection = QtWidgets.QComboBox(self)
+        self.parameterSelection.setGeometry(QtCore.QRect(10, 10, 221, 22))
+        self.parameterSelection.addItems(['Год выпуска', 'Название', 'Продолжительность'])
+
+        self.queryLine = QtWidgets.QLineEdit(self)
+        self.queryLine.setGeometry(QtCore.QRect(240, 10, 211, 20))
+
+        self.queryButton = QtWidgets.QPushButton("Поиск", self)
+        self.queryButton.setGeometry(QtCore.QRect(460, 10, 75, 23))
+        self.queryButton.clicked.connect(self.search)
+
+        self.labelId = QtWidgets.QLabel("ID:", self)
+        self.labelId.setGeometry(QtCore.QRect(10, 60, 100, 20))
+
+        self.labelTitle = QtWidgets.QLabel("Название:", self)
+        self.labelTitle.setGeometry(QtCore.QRect(10, 100, 100, 20))
+
+        self.labelYear = QtWidgets.QLabel("Год:", self)
+        self.labelYear.setGeometry(QtCore.QRect(10, 140, 100, 20))
+
+        self.labelGenre = QtWidgets.QLabel("Жанр:", self)
+        self.labelGenre.setGeometry(QtCore.QRect(10, 180, 100, 20))
+
+        self.labelDuration = QtWidgets.QLabel("Продолжительность:", self)
+        self.labelDuration.setGeometry(QtCore.QRect(10, 220, 100, 20))
+
+        self.idEdit = QtWidgets.QLineEdit(self)
+        self.idEdit.setGeometry(QtCore.QRect(120, 60, 100, 20))
+        self.idEdit.setReadOnly(True)
+
+        self.titleEdit = QtWidgets.QLineEdit(self)
+        self.titleEdit.setGeometry(QtCore.QRect(120, 100, 200, 20))
+        self.titleEdit.setReadOnly(True)
+
+        self.yearEdit = QtWidgets.QLineEdit(self)
+        self.yearEdit.setGeometry(QtCore.QRect(120, 140, 100, 20))
+        self.yearEdit.setReadOnly(True)
+
+        self.genreEdit = QtWidgets.QLineEdit(self)
+        self.genreEdit.setGeometry(QtCore.QRect(120, 180, 200, 20))
+        self.genreEdit.setReadOnly(True)
+
+        self.durationEdit = QtWidgets.QLineEdit(self)
+        self.durationEdit.setGeometry(QtCore.QRect(120, 220, 100, 20))
+        self.durationEdit.setReadOnly(True)
+
+        self.errorLabel = QtWidgets.QLabel(self)
+        self.errorLabel.setGeometry(QtCore.QRect(10, 270, 341, 16))
+
+    def search(self):
+        try:
+            text = self.queryLine.text().strip()
+            if text == '':
+                self.idEdit.clear()
+                self.titleEdit.clear()
+                self.yearEdit.clear()
+                self.genreEdit.clear()
+                self.durationEdit.clear()
+                self.errorLabel.setText("Неправильный запрос")  
+                return  
+
+            cur = self.con.cursor()
+
+            searching = {
+                'Год выпуска': 'year',
+                'Название': 'title',
+                'Продолжительность': 'duration'
+            }[self.parameterSelection.currentText()]
+
+            query = f'SELECT * FROM Films WHERE {searching} = ? ORDER BY id LIMIT 1'
+            res = cur.execute(query, (text,)).fetchall()
+
+            if res:
+                elem = res[0]  
+                self.idEdit.setText(str(elem[0]))
+                self.titleEdit.setText(str(elem[1]))
+                self.yearEdit.setText(str(elem[2]))
+                self.genreEdit.setText(str(elem[3]))
+                self.durationEdit.setText(str(elem[4]))
+                self.errorLabel.setText("") 
+            else:
+                self.idEdit.clear()
+                self.titleEdit.clear()
+                self.yearEdit.clear()
+                self.genreEdit.clear()
+                self.durationEdit.clear()
+                self.errorLabel.setText("Ничего не найдено")  
+
+        except ValueError as ve:
+            self.errorLabel.setText(str(ve)) 
+        except Exception as e:
+            print(e)
+            self.errorLabel.setText("Неправильный запрос")  
+
+
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    ex = MyWidget()
+    ex.show()
+    sys.exit(app.exec())
