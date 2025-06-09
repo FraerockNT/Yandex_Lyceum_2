@@ -1,0 +1,52 @@
+import sys
+import csv
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLineEdit, QTableWidget, QTableWidgetItem
+from PyQt6.QtCore import Qt
+
+
+class InteractiveReceipt(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setGeometry(500, 250, 600, 600)
+        self.setFixedSize(600, 600)
+        self.setWindowTitle('DataShower')
+        self.setMouseTracking(True)
+
+        self.total = QLineEdit("0", self)
+        self.total.setEnabled(False)
+        self.total.setGeometry(250, 525, 100, 50)
+
+        with open("price.csv", mode="r", encoding="UTF-8") as input_file:
+            reader = csv.reader(input_file, delimiter=";", quotechar='"')
+            self.data = [[name, value] for (name, value, *args) in reader if len(args)]
+
+        self.tableWidget = QTableWidget(len(self.data), 3, self)
+        self.tableWidget.setHorizontalHeaderLabels(['Название', 'Цена', 'Количество'])
+        self.tableWidget.horizontalHeader().setDefaultSectionSize(200)
+        self.tableWidget.setGeometry(0, 0, 800, 500)
+
+        for index, line in enumerate(self.data):
+            arr = QTableWidgetItem(line[0]), QTableWidgetItem(line[1]), QTableWidgetItem('0')
+
+            for elem in arr:
+                elem.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            self.tableWidget.setItem(index, 0, arr[0])
+            self.tableWidget.setItem(index, 1, arr[1])
+            self.tableWidget.setItem(index, 2, arr[2])
+
+        self.tableWidget.itemChanged.connect(self.change_data)
+
+    def change_data(self):
+        r = self.tableWidget.rowCount()
+        total = sum(
+            int(self.tableWidget.item(row, 1).text()) * int(self.tableWidget.item(row, 2).text()) for row in range(r)
+        )
+        self.total.setText(str(total))
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = InteractiveReceipt()
+    ex.show()
+    sys.exit(app.exec())
