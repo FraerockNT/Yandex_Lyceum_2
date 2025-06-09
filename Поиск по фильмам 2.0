@@ -1,0 +1,88 @@
+import sys
+import sqlite3
+from PyQt6.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, 
+    QTableWidget, QTableWidgetItem, QMessageBox
+)
+
+
+class MyWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.con = sqlite3.connect('films_db.sqlite')
+        self.cursor = self.con.cursor()
+
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('Поиск по фильмам')
+
+        layout = QVBoxLayout()
+
+        self.year = QLineEdit(self)
+        self.year.setPlaceholderText('')
+        layout.addWidget(self.year)
+
+        self.title = QLineEdit(self)
+        self.title.setPlaceholderText('')
+        layout.addWidget(self.title)
+
+        self.duration = QLineEdit(self)
+        self.duration.setPlaceholderText('')
+        layout.addWidget(self.duration)
+
+        self.queryButton = QPushButton('Поиск', self)
+        self.queryButton.clicked.connect(self.search)
+        layout.addWidget(self.queryButton)
+
+        self.tableWidget = QTableWidget(self)
+        layout.addWidget(self.tableWidget)
+
+        self.setLayout(layout)
+
+    def search(self):
+        year = self.year.text().strip()
+        title = self.title.text().strip()
+        duration = self.duration.text().strip()
+
+        query = "SELECT id, title, year, genre, duration FROM Films WHERE 1=1"
+        params = []
+
+        if year:
+            query += f" AND year {year}"
+        if title:
+            query += f" AND title {title}"
+        if duration:
+            query += f" AND duration {duration}"
+
+        try:
+            self.cursor.execute(query, params)
+            results = self.cursor.fetchall()
+
+            column_names = [description[0] for description in self.cursor.description]
+
+            self.tableWidget.setRowCount(len(results))
+            self.tableWidget.setColumnCount(len(column_names))
+            self.tableWidget.setHorizontalHeaderLabels(column_names)
+
+            for row_index, row_data in enumerate(results):
+                for column_index, item in enumerate(row_data):
+                    self.tableWidget.setItem(row_index, column_index, QTableWidgetItem(str(item)))
+
+            self.year.clear()
+            self.title.clear()
+            self.duration.clear()
+        except sqlite3.Error as e:
+            QMessageBox.critical(self, "Ошибка", f"Произошла ошибка при выполнении запроса: {e}")
+
+    def closeEvent(self, event):
+        self.con.close()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    widget = MyWidget()
+    widget.resize(800, 600)
+    widget.show()
+    sys.exit(app.exec())
