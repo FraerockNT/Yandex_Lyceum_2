@@ -1,0 +1,12 @@
+import openpyxl
+import csv
+
+workbook = openpyxl.load_workbook(filename='data.xlsx', data_only=True)
+
+sheet = workbook.active
+
+with open('output.csv', mode='w', newline='', encoding='utf-8') as csvfile:
+    csv_writer = csv.writer(csvfile, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+    for row in sheet.iter_rows(values_only=True):
+        csv_writer.writerow(row)
