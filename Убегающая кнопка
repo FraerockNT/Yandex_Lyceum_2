@@ -1,0 +1,40 @@
+import sys
+import random
+from PyQt6.QtWidgets import QApplication, QWidget, QPushButton
+
+
+class MyWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Убегающая кнопка")
+        self.setGeometry(100, 100, 400, 300)
+
+        self.button = QPushButton("button", self)
+        self.button.setGeometry(150, 100, 100, 50)
+
+        self.button.setMouseTracking(True)
+        self.setMouseTracking(True)
+
+    def mouseMoveEvent(self, event):
+        mouse_pos = event.position().toPoint()
+        button_rect = self.button.geometry()
+
+        if button_rect.contains(mouse_pos):
+            self.move_button_away()
+
+    def move_button_away(self):
+        button_rect = self.button.geometry()
+        window_rect = self.geometry()
+
+        new_x = random.randint(0, window_rect.width() - button_rect.width())
+        new_y = random.randint(0, window_rect.height() - button_rect.height())
+
+        self.button.move(new_x, new_y)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    widget = MyWidget()
+    widget.show()
+    sys.exit(app.exec())
