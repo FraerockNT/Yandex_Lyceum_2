@@ -1,0 +1,12 @@
+import sqlite3
+
+con = sqlite3.connect(input())
+cur = con.cursor()
+
+result = cur.execute("""SELECT year FROM Films 
+WHERE films.title LIKE 'Х%'""").fetchall()
+
+for elem in set(result):
+    print(elem[0])
+
+con.close()
