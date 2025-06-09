@@ -1,0 +1,106 @@
+import io
+import sqlite3
+import sys
+ 
+from PyQt6 import uic
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem
+ 
+template = """<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>802</width>
+    <height>478</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Фильтрация по жанрам</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QComboBox" name="parameterSelection">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>201</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="queryButton">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>60</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ПУСК</string>
+    </property>
+   </widget>
+   <widget class="QTableWidget" name="tableWidget">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>10</y>
+      <width>561</width>
+      <height>411</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>802</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
+"""
+ 
+ 
+class MyWidget(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        f = io.StringIO(template)
+        uic.loadUi(f, self)
+        self.con = sqlite3.connect("films_db.sqlite")
+        self.cur = self.con.cursor()
+        res = self.cur.execute('''SELECT title  FROM genres''').fetchall()
+        items = [x[0] for x in res]
+        self.parameterSelection.addItems(items)
+        self.genre = 'комедия'
+        self.queryButton.clicked.connect(self.search)
+        self.search()
+ 
+    def search(self):
+        query = 'SELECT title, genre, year FROM Films WHERE genre=(SELECT id FROM Genres WHERE title=?)'
+        res = self.cur.execute(query, (self.parameterSelection.currentText(),)).fetchall()
+        self.tableWidget.setRowCount(len(res))
+        self.tableWidget.setColumnCount(len(res[0]))
+        self.tableWidget.setHorizontalHeaderLabels(['Название', 'Жанр', 'Год'])
+        for i, elem in enumerate(res):
+            for j, val in enumerate(elem):
+                self.tableWidget.setItem(i, j, QTableWidgetItem(str(val)))
+ 
+ 
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = MyWidget()
+    ex.show()
+    sys.exit(app.exec())
