@@ -1,0 +1,172 @@
+import sqlite3
+import sys
+from datetime import datetime
+
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QTableWidgetItem, QVBoxLayout, QWidget, QPushButton,
+    QTableWidget, QHBoxLayout, QSpacerItem, QSizePolicy, QPlainTextEdit, QLabel,
+    QComboBox, QStatusBar
+)
+
+DB_NAME = "films_db.sqlite"
+
+
+class AddWidget(QMainWindow):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Добавить элемент")
+        self.setGeometry(100, 100, 400, 229)
+
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        self.layout = QVBoxLayout(self.central_widget)
+
+        self.title_label = QLabel("Название")
+        self.layout.addWidget(self.title_label)
+        self.title = QPlainTextEdit()
+        self.layout.addWidget(self.title)
+
+        self.year_label = QLabel("Год выпуска")
+        self.layout.addWidget(self.year_label)
+        self.year = QPlainTextEdit()
+        self.layout.addWidget(self.year)
+
+        self.genre_label = QLabel("Жанр")
+        self.layout.addWidget(self.genre_label)
+        self.comboBox = QComboBox()
+        self.layout.addWidget(self.comboBox)
+
+        self.duration_label = QLabel("Длина")
+        self.layout.addWidget(self.duration_label)
+        self.duration = QPlainTextEdit()
+        self.layout.addWidget(self.duration)
+
+        self.pushButton = QPushButton("Добавить")
+        self.layout.addWidget(self.pushButton)
+
+        self.statusBar = QStatusBar()
+        self.setStatusBar(self.statusBar)
+
+        self.con = sqlite3.connect(DB_NAME)
+        self.params = {}
+        self.select_genres()
+        self.pushButton.clicked.connect(self.add_elem)
+        self.__is_adding_successful = False
+
+    def select_genres(self):
+        req = "SELECT * from genres"
+        cur = self.con.cursor()
+        for value, key in cur.execute(req).fetchall():
+            self.params[key] = value
+        self.comboBox.addItems(list(self.params.keys()))
+
+    def add_elem(self):
+        cur = self.con.cursor()
+        try:
+            id = cur.execute("SELECT max(id) FROM films").fetchone()[0] + 1
+            title = self.title.toPlainText()
+            year = int(self.year.toPlainText())
+            genre = self.params.get(self.comboBox.currentText())
+            duration = int(self.duration.toPlainText())
+
+            if len(title) == 0:
+                raise ValueError('title lenght == 0')
+            if year < 0 or year > datetime.now().year:
+                raise ValueError('year <= 0 or year > current date')
+            if duration < 0:
+                raise ValueError('duration <= 0')
+
+            new_data = (id, title, year, genre, duration)
+            cur.execute("INSERT INTO films VALUES (?,?,?,?,?)", new_data)
+            self.__is_adding_successful = True
+        except ValueError:
+            self.__is_adding_successful = False
+            self.statusBar.showMessage("Неверно заполнена форма")
+        else:
+            self.con.commit()
+            self.parent().update_result()
+            self.close()
+
+    def get_adding_verdict(self):
+        return self.__is_adding_successful
+
+
+class MyWidget(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Фильмотека")
+        self.setGeometry(100, 100, 800, 600)
+
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        self.layout = QVBoxLayout(self.central_widget)
+
+        self.horizontalLayout = QHBoxLayout()
+        self.layout.addLayout(self.horizontalLayout)
+
+        self.addButton = QPushButton("Добавить")
+        self.horizontalLayout.addWidget(self.addButton)
+
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalLayout.addItem(self.horizontalSpacer)
+
+        self.tableWidget = QTableWidget()
+        self.layout.addWidget(self.tableWidget)
+
+        self.con = sqlite3.connect(DB_NAME)
+        self.check_tables()
+        self.update_result()
+        self.addButton.clicked.connect(self.adding)
+        self.add_form = None
+
+    def check_tables(self):
+        cur = self.con.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS genres (
+                id INTEGER PRIMARY KEY,
+                title TEXT
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS films (
+                id INTEGER PRIMARY KEY,
+                title TEXT,
+                year INTEGER,
+                genre INTEGER,
+                duration INTEGER,
+                FOREIGN KEY (genre) REFERENCES genres(id)
+            )
+        """)
+        self.con.commit()
+
+    def update_result(self):
+        cur = self.con.cursor()
+        que = "SELECT f.id, f.title, f.year, g.title, f.duration " \
+              "FROM films as f JOIN genres as g ON g.id = f.genre ORDER BY f.id DESC"
+        result = cur.execute(que).fetchall()
+
+        self.tableWidget.setRowCount(len(result))
+        self.tableWidget.setColumnCount(len(result[0]))
+        self.tableWidget.setHorizontalHeaderLabels(
+            ['ИД', 'Название фильма', 'Год выпуска', 'Жанр',
+             'Продолжительность'])
+
+        for i, elem in enumerate(result):
+            for j, val in enumerate(elem):
+                self.tableWidget.setItem(i, j, QTableWidgetItem(str(val)))
+
+    def adding(self):
+        self.add_form = AddWidget(self)
+        self.add_form.show()
+
+
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    form = MyWidget()
+    form.show()
+    sys.excepthook = except_hook
+    sys.exit(app.exec())
