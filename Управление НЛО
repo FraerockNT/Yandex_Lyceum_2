@@ -1,0 +1,46 @@
+import sys
+from PyQt6.QtWidgets import QWidget, QApplication, QLabel
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import Qt
+
+
+class UfoControl(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setFixedSize(300, 300)
+        self.setWindowTitle('Управление НЛО')
+        self.ufo = QLabel(self)
+        self.ufo.setPixmap(QPixmap('ufo.png'))
+        self.ufo.move(0, 0)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Up:
+            self.move(0, -10)
+        elif event.key() == Qt.Key.Key_Down:
+            self.move(0, 10)
+        elif event.key() == Qt.Key.Key_Left:
+            self.move(-10, 0)
+        elif event.key() == Qt.Key.Key_Right:
+            self.move(10, 0)
+
+    def move(self, xx, yy):
+        self.xxx = self.ufo.pos().x()
+        self.yyy = self.ufo.pos().y()
+        self.ufo.move(self.xxx + xx, self.yyy + yy)
+        self.xxx = self.ufo.pos().x()
+        self.yyy = self.ufo.pos().y()
+        if self.xxx < 0:
+            self.ufo.move(250, self.yyy)
+        elif self.xxx > 250:
+            self.ufo.move(0, self.yyy)
+        elif self.yyy > 250:
+            self.ufo.move(self.xxx, 0)
+        elif self.yyy < 0:
+            self.ufo.move(self.xxx, 250)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = UfoControl()
+    ex.show()
+    sys.exit(app.exec())
