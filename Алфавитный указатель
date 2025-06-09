@@ -1,0 +1,77 @@
+import sys
+import sqlite3
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QHBoxLayout, QPushButton,
+    QTableWidget, QTableWidgetItem, QStatusBar, QMessageBox, QVBoxLayout
+)
+
+
+class MyWidget(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('Поиск фильмов по алфавиту')
+        self.setGeometry(100, 100, 800, 600)
+
+        self.con = sqlite3.connect('films_db.sqlite')
+        self.cursor = self.con.cursor()
+
+        self.buttons = []
+        self.initUI()
+
+    def initUI(self):
+        central_widget = QWidget(self)
+        self.setCentralWidget(central_widget)
+        main_layout = QVBoxLayout(central_widget)
+
+        button_layout = QHBoxLayout()
+        alphabet = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
+        for letter in alphabet:
+            button = QPushButton(letter, self)
+            button.clicked.connect(lambda checked, lett=letter: self.filter_movies(lett))
+            self.buttons.append(button)
+            button_layout.addWidget(button)
+
+        main_layout.addLayout(button_layout)
+
+        self.tableWidget = QTableWidget(self)
+        main_layout.addWidget(self.tableWidget)
+
+        self.statusbar = QStatusBar(self)
+        self.setStatusBar(self.statusbar)
+
+    def filter_movies(self, letter):
+        query = "SELECT id, title, year, genre, duration FROM Films WHERE title LIKE ?"
+        params = [f"{letter}%"]
+
+        try:
+            self.cursor.execute(query, params)
+            results = self.cursor.fetchall()
+
+            column_names = [description[0] for description in self.cursor.description]
+
+            self.tableWidget.setRowCount(len(results))
+            self.tableWidget.setColumnCount(len(column_names))
+            self.tableWidget.setHorizontalHeaderLabels(column_names)
+
+            for row_index, row_data in enumerate(results):
+                for column_index, item in enumerate(row_data):
+                    self.tableWidget.setItem(row_index, column_index, QTableWidgetItem(str(item)))
+
+            if results:
+                self.statusbar.showMessage(f"Нашлось {len(results)} записей")
+            else:
+                self.statusbar.showMessage("К сожалению, ничего не нашлось")
+
+        except sqlite3.Error as e:
+            QMessageBox.critical(self, "Ошибка", f"Произошла ошибка при выполнении запроса: {e}")
+
+    def closeEvent(self, event):
+        self.con.close()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    widget = MyWidget()
+    widget.show()
+    sys.exit(app.exec())
